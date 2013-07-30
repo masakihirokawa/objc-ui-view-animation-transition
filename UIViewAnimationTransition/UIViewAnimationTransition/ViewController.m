@@ -8,73 +8,81 @@
 
 #import "ViewController.h"
 
-static const NSInteger kTagViewForTransitionTest = 1;
-
-#pragma mark ----- Private Methods Definition -----
-
-@interface ViewController ()
-
-- (UIView*)nextView;
-- (void)animationDidStop;
-
-@end
-
-#pragma mark ----- Start Implementation For Methods -----
+#pragma mark start implementation for methods
 
 @implementation ViewController
+
+typedef enum transitions : NSUInteger {
+    viewForTransition = 1
+} transitions;
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    //次のビューをセット
     [self.view addSubview:[self nextView]];
 }
 
-#pragma mark ----- Responder -----
+#pragma mark responder
 
-- (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
-    if ( ![UIView areAnimationsEnabled] ) {
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    //アニメーション実行中であれば処理しない
+    if (![UIView areAnimationsEnabled]) {
         [self.nextResponder touchesEnded:touches withEvent:event];
         return;
     }
-    static UIViewAnimationTransition transition = UIViewAnimationTransitionFlipFromLeft;
+    static UIViewAnimationTransition transition = ANIMATION_FLIP_FROM_LEFT;
     
-    UIView* nextView = [self nextView];
+    //次のビューをセット
+    UIView *nextView = [self nextView];
+    
+    //アニメーション定義
     [UIView beginAnimations:nil context:NULL];
     [UIView setAnimationDelegate:self];
-    [UIView setAnimationDidStopSelector:@selector(animationDidStop)];
-    [UIView setAnimationDuration:2.0];
+    [UIView setAnimationDidStopSelector:@selector(animationDidStop:)];
+    [UIView setAnimationDuration:ANIMATION_DURATION];
     [UIView setAnimationTransition:transition forView:self.view cache:YES];
-    [[self.view viewWithTag:kTagViewForTransitionTest] removeFromSuperview];
+    
+    //ビューの入れ替え
+    [[self.view viewWithTag:viewForTransition] removeFromSuperview];
     [self.view addSubview:nextView];
+    
+    //アニメーション実行
     [UIView commitAnimations];
+    
+    //アニメーションを無効にする
     [UIView setAnimationsEnabled:NO];
     
-    if ( UIViewAnimationTransitionCurlDown < ++transition ) {
-        transition = UIViewAnimationTransitionFlipFromLeft;
+    //次に実行されるアニメーションの種類変更
+    if (ANIMATION_CURL_DOWN < ++transition) {
+        transition = ANIMATION_FLIP_FROM_LEFT;
     }
 }
 
-#pragma mark ----- Private Methods -----
+#pragma mark private methods
 
-- (UIView*)nextView {
+- (UIView *)nextView
+{
+    //表か裏の画像を指定
     static BOOL isFront = YES;
-    UIImage* image;
-    if ( isFront ) {
-        image = [UIImage imageNamed:@"Hesychasm_640_1136.jpg"]; //< 表用の画像
-    } else {
-        image = [UIImage imageNamed:@"Echidna_640_1136.jpg"]; //< 裏用の画像
-    }
-    isFront = ( YES != isFront );
-    UIView* view = [[UIImageView alloc] initWithImage:image];
-    view.tag = kTagViewForTransitionTest;
+    UIImage *image = [UIImage imageNamed:isFront ? FRONT_IMAGE : BACK_IMAGE];
+    isFront = !isFront;
+    
+    //ビューに画像をセット
+    UIView *view = [[UIImageView alloc] initWithImage:image];
+    view.tag = viewForTransition;
     view.frame = self.view.bounds;
     view.autoresizingMask =
-    UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     view.contentMode = UIViewContentModeScaleAspectFill;
     return view;
 }
 
-- (void)animationDidStop {
+- (void)animationDidStop:(id)selector
+{
+    //アニメーションを有効にする
     [UIView setAnimationsEnabled:YES];
 }
 

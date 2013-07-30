@@ -8,6 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
+#define ANIMATION_FLIP_FROM_LEFT UIViewAnimationTransitionFlipFromLeft
+#define ANIMATION_CURL_DOWN      UIViewAnimationTransitionCurlDown
+#define ANIMATION_DURATION       0.75f
+#define FRONT_IMAGE              @"Hesychasm_640_1136.jpg"
+#define BACK_IMAGE               @"Echidna_640_1136.jpg"
+
 @interface ViewController : UIViewController
 
 @end
